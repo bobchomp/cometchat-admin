@@ -3,69 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CometChat Admin Page</title>
+    <title>CometChat Command Center</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* --- CSS STYLES --- */
+        :root { --primary-color: #34495e; --accent-color: #3498db; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #f0f2f5; display: flex; height: 100vh; overflow: hidden; }
         
         /* LOGIN SCREEN */
-        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #2c3e50; z-index: 999; display: flex; justify-content: center; align-items: center; flex-direction: column; color: white; }
+        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary-color); z-index: 999; display: flex; justify-content: center; align-items: center; flex-direction: column; color: white; }
         #login-screen input { padding: 12px; font-size: 16px; border-radius: 5px; border: none; margin-bottom: 15px; width: 250px; text-align: center; }
         #login-screen button { padding: 12px 30px; font-size: 16px; background: #27ae60; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        #login-screen button:hover { background: #2ecc71; }
         
         /* SIDEBAR */
-        #sidebar { width: 260px; background: #34495e; color: white; display: flex; flex-direction: column; padding: 20px; box-shadow: 2px 0 5px rgba(0,0,0,0.1); }
-        #sidebar h2 { margin-top: 0; font-size: 22px; border-bottom: 1px solid #46627f; padding-bottom: 20px; letter-spacing: 1px; }
-        .nav-btn { background: none; border: none; color: #bdc3c7; text-align: left; padding: 15px; font-size: 16px; cursor: pointer; transition: 0.2s; border-radius: 6px; margin-bottom: 8px; display: flex; align-items: center; }
-        .nav-btn:hover, .nav-btn.active { background: #2c3e50; color: white; padding-left: 20px; }
-        
-        /* LOCK BUTTON */
+        #sidebar { width: 260px; background: var(--primary-color); color: white; display: flex; flex-direction: column; padding: 20px; box-shadow: 2px 0 5px rgba(0,0,0,0.1); }
+        #sidebar h2 { margin-top: 0; font-size: 20px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 20px; letter-spacing: 1px; }
+        .nav-btn { background: none; border: none; color: #bdc3c7; text-align: left; padding: 12px; font-size: 15px; cursor: pointer; transition: 0.2s; border-radius: 6px; margin-bottom: 5px; display: flex; align-items: center; }
+        .nav-btn:hover, .nav-btn.active { background: rgba(255,255,255,0.1); color: white; padding-left: 18px; }
         .lock-btn { margin-top: auto; background: #e74c3c; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: bold; text-align: center; }
-        .lock-btn:hover { background: #c0392b; }
 
         /* MAIN CONTENT */
-        #main-content { flex: 1; padding: 40px; overflow-y: auto; display: none; background: #ecf0f1; } 
-        
+        #main-content { flex: 1; padding: 30px; overflow-y: auto; display: none; background: #ecf0f1; } 
         .section { display: none; animation: fadeIn 0.4s; }
         .section.active { display: block; }
         
-        /* CARDS & TABLES */
-        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; }
-        h3 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #f1f2f6; padding-bottom: 15px; margin-bottom: 20px; }
+        /* CARDS & UTILS */
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        .row { display: flex; gap: 20px; }
+        .col { flex: 1; }
+        h3 { margin-top: 0; color: var(--primary-color); border-bottom: 2px solid #f1f2f6; padding-bottom: 15px; margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center; }
         
-        /* FORM ELEMENTS */
-        .form-group { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; }
-        input, select { padding: 12px; border: 1px solid #ddd; border-radius: 6px; flex: 1; font-size: 14px; }
-        input:disabled { background: #f8f9fa; color: #999; cursor: not-allowed; }
+        /* FORMS & INPUTS */
+        .form-group { display: flex; gap: 10px; margin-bottom: 15px; align-items: center; }
+        input, select, textarea { padding: 10px; border: 1px solid #ddd; border-radius: 6px; flex: 1; font-size: 14px; }
         
-        button.action-btn { padding: 12px 25px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        button.action-btn:hover { background: #2980b9; }
-        button.cancel-btn { background: #95a5a6; }
+        /* BUTTONS */
+        button.action-btn { padding: 10px 20px; background: var(--accent-color); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        button.action-btn:hover { opacity: 0.9; }
+        button.delete-btn { background: #e74c3c; color: white; padding: 5px 10px; border-radius:4px; border:none; cursor:pointer; }
+        button.secondary-btn { background: #95a5a6; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer; font-size:12px; }
 
-        /* TABLE STYLES */
+        /* TABLES */
         table { width: 100%; border-collapse: collapse; }
-        th { background: #f8f9fa; text-align: left; padding: 15px; border-bottom: 2px solid #eee; color: #7f8c8d; font-weight: 600; }
-        td { padding: 15px; border-bottom: 1px solid #eee; color: #2c3e50; vertical-align: middle; }
-        tr:hover td { background: #fbfbfb; }
-        
-        /* ACTION BUTTONS IN TABLE */
-        .btn-sm { padding: 6px 12px; border-radius: 4px; border: none; cursor: pointer; font-size: 13px; margin-right: 5px; color: white; }
-        .edit-btn { background: #f39c12; }
-        .delete-btn { background: #e74c3c; }
-        
-        /* LOGS */
-        .log-entry { padding: 15px; border-bottom: 1px solid #eee; font-size: 14px; display: flex; flex-direction: column; }
-        .log-meta { color: #95a5a6; font-size: 12px; margin-bottom: 5px; font-weight: bold; text-transform: uppercase; }
-        .message-bubble { background: #f1f2f6; padding: 10px; border-radius: 8px; display: inline-block; max-width: 80%; }
+        th { background: #f8f9fa; text-align: left; padding: 12px; border-bottom: 2px solid #eee; color: #7f8c8d; font-weight: 600; font-size:13px; }
+        td { padding: 12px; border-bottom: 1px solid #eee; color: #2c3e50; vertical-align: middle; font-size:14px; }
+        tr.highlight-danger { background-color: #ffeaea; } /* For banned words */
 
-        /* CALL STATUS BADGES */
-        .call-badge { color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; text-transform: uppercase; font-weight: bold; display: inline-block; width: 80px; text-align: center;}
-        .status-initiated { background: #f39c12; }
-        .status-ended { background: #27ae60; }
-        .status-cancelled { background: #e74c3c; }
-        .status-rejected { background: #c0392b; }
-        .status-busy { background: #95a5a6; }
+        /* LOGS */
+        .log-entry { padding: 15px; border-bottom: 1px solid #eee; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+        .log-content { max-width: 85%; }
+        .log-meta { color: #95a5a6; font-size: 11px; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; }
+        .message-bubble { background: #f1f2f6; padding: 8px 12px; border-radius: 8px; display: inline-block; }
+        .banned-word { color: red; font-weight: bold; text-decoration: underline; }
+
+        /* MODAL */
+        #modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; display:none; justify-content:center; align-items:center; }
+        #modal-box { background:white; padding:30px; border-radius:8px; width:500px; max-height:80vh; overflow-y:auto; position:relative; }
+        .close-modal { position:absolute; top:10px; right:15px; font-size:20px; cursor:pointer; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -73,46 +67,69 @@
 <body>
 
     <div id="login-screen">
-        <h2 style="margin-bottom:5px;">🛡️ Command Center</h2>
-        <p style="margin-top:0; color:#bdc3c7; font-size:14px; margin-bottom:30px;">Authorized Personnel Only</p>
+        <h2 id="login-title">🛡️ Command Center</h2>
+        <p style="margin-top:0; color:#bdc3c7; font-size:14px; margin-bottom:30px;">Admin: <b>admin123</b> | Mod: <b>mod123</b></p>
         <input type="password" id="passwordInput" placeholder="Enter Access Code">
         <button onclick="attemptLogin()">Unlock Dashboard</button>
         <p id="loginError" style="color: #e74c3c; display: none; margin-top:15px;">⛔ Access Denied</p>
     </div>
 
     <div id="sidebar" style="display: none;">
-        <h2>⚡ Admin Panel</h2>
-        <button class="nav-btn active" onclick="showSection('users')">👥 Users</button>
+        <h2 id="sidebar-title">⚡ Admin Panel</h2>
+        <button class="nav-btn active" onclick="showSection('analytics')">📊 Analytics</button>
+        <button class="nav-btn" onclick="showSection('users')">👥 Users</button>
         <button class="nav-btn" onclick="showSection('groups')">📢 Groups</button>
-        <button class="nav-btn" onclick="showSection('chatlogs')">💬 Chat Logs</button>
-        <button class="nav-btn" onclick="showSection('calllogs')">📹 Calls</button>
+        <button class="nav-btn" onclick="showSection('chatlogs')">💬 Chat Inspector</button>
+        <button class="nav-btn" onclick="showSection('broadcast')">📡 Broadcast</button>
+        <button class="nav-btn" onclick="showSection('settings')">⚙️ Settings</button>
         
-        <button class="lock-btn" onclick="lockDashboard()">🔒 Lock Dashboard</button>
+        <div style="margin-top:auto">
+            <div id="role-display" style="font-size:11px; text-align:center; margin-bottom:10px; color:#bdc3c7;">Role: Guest</div>
+            <button class="lock-btn" onclick="lockDashboard()">🔒 Lock</button>
+        </div>
     </div>
 
     <div id="main-content">
         
-        <div id="users" class="section active">
-            <div class="card">
-                <h3 id="userFormTitle">Create New User</h3>
-                <div class="form-group">
-                    <input type="text" id="userUid" placeholder="UID (Unique ID - Cannot change later)">
-                    <input type="text" id="userName" placeholder="Display Name">
-                    <input type="text" id="userAvatar" placeholder="Avatar URL (Optional)">
+        <div id="analytics" class="section active">
+            <div class="row">
+                <div class="col card">
+                    <h3>User Distribution</h3>
+                    <canvas id="userChart"></canvas>
                 </div>
-                <div class="form-group">
-                    <button class="action-btn" id="saveUserBtn" onclick="saveUser()">+ Add User</button>
-                    <button class="action-btn cancel-btn" id="cancelUserBtn" onclick="resetUserForm()" style="display:none;">Cancel Edit</button>
+                <div class="col card">
+                    <h3>Platform Activity</h3>
+                    <div style="text-align:center; padding:20px;">
+                        <h1 style="font-size:48px; margin:0; color:var(--accent-color)" id="totalUsersCount">0</h1>
+                        <p>Total Users</p>
+                        <h1 style="font-size:48px; margin:0; color:#27ae60" id="totalGroupsCount">0</h1>
+                        <p>Active Groups</p>
+                    </div>
                 </div>
             </div>
+        </div>
 
+        <div id="users" class="section">
             <div class="card">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                    <h3 style="margin:0; border:none;">User Database</h3>
-                    <button class="action-btn" onclick="fetchUsers()" style="padding:8px 15px; font-size:13px;">🔄 Refresh</button>
+                <h3>Create User</h3>
+                <div class="form-group">
+                    <input type="text" id="userUid" placeholder="UID">
+                    <input type="text" id="userName" placeholder="Display Name">
+                    <input type="text" id="userAvatar" placeholder="Avatar URL">
+                    <button class="action-btn" onclick="saveUser()">+ Add User</button>
                 </div>
+            </div>
+            <div class="card">
+                <h3>
+                    User Database
+                    <div>
+                        <input type="text" id="searchUser" placeholder="Search..." onkeyup="filterTable('searchUser', 'userTable')" style="width:150px; padding:6px;">
+                        <button class="secondary-btn" onclick="exportTableToCSV('userTable', 'users.csv')">📥 CSV</button>
+                        <button class="secondary-btn" style="background:#e74c3c" onclick="bulkDeleteUsers()">🗑️ Bulk Delete</button>
+                    </div>
+                </h3>
                 <table id="userTable">
-                    <thead><tr><th>Avatar</th><th>UID</th><th>Name</th><th>Status</th><th>Actions</th></tr></thead>
+                    <thead><tr><th style="width:30px"><input type="checkbox" onclick="toggleAll(this, 'userTable')"></th><th>Avatar</th><th>UID</th><th>Name</th><th>Metadata/IP</th><th>Actions</th></tr></thead>
                     <tbody></tbody>
                 </table>
             </div>
@@ -120,29 +137,25 @@
 
         <div id="groups" class="section">
             <div class="card">
-                <h3 id="groupFormTitle">Create New Group</h3>
+                <h3>Create Group</h3>
                 <div class="form-group">
-                    <input type="text" id="groupGuid" placeholder="GUID (Unique Group ID)">
+                    <input type="text" id="groupGuid" placeholder="GUID">
                     <input type="text" id="groupName" placeholder="Group Name">
-                    <select id="groupType">
-                        <option value="public">Public</option>
-                        <option value="private">Private</option>
-                        <option value="password">Password Protected</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <button class="action-btn" id="saveGroupBtn" onclick="saveGroup()">+ Create Group</button>
-                    <button class="action-btn cancel-btn" id="cancelGroupBtn" onclick="resetGroupForm()" style="display:none;">Cancel Edit</button>
+                    <select id="groupType"><option value="public">Public</option><option value="private">Private</option></select>
+                    <button class="action-btn" onclick="saveGroup()">+ Create</button>
                 </div>
             </div>
-
             <div class="card">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                    <h3 style="margin:0; border:none;">Active Groups</h3>
-                    <button class="action-btn" onclick="fetchGroups()" style="padding:8px 15px; font-size:13px;">🔄 Refresh</button>
-                </div>
+                <h3>
+                    Active Groups
+                    <div>
+                        <input type="text" id="searchGroup" placeholder="Search..." onkeyup="filterTable('searchGroup', 'groupTable')" style="width:150px; padding:6px;">
+                        <button class="secondary-btn" onclick="exportTableToCSV('groupTable', 'groups.csv')">📥 CSV</button>
+                        <button class="secondary-btn" style="background:#e74c3c" onclick="bulkDeleteGroups()">🗑️ Bulk Delete</button>
+                    </div>
+                </h3>
                 <table id="groupTable">
-                    <thead><tr><th>GUID</th><th>Name</th><th>Type</th><th>Members</th><th>Actions</th></tr></thead>
+                    <thead><tr><th style="width:30px"><input type="checkbox" onclick="toggleAll(this, 'groupTable')"></th><th>GUID</th><th>Name</th><th>Type</th><th>Members</th><th>Actions</th></tr></thead>
                     <tbody></tbody>
                 </table>
             </div>
@@ -152,382 +165,402 @@
             <div class="card">
                 <h3>🔍 Message Inspector</h3>
                 <div class="form-group">
-                    <input type="text" id="logId" placeholder="Enter UID or GUID to inspect">
-                    <select id="logType" style="flex:0.3">
-                        <option value="users">User (1-on-1)</option>
-                        <option value="groups">Group</option>
-                    </select>
+                    <input type="text" id="logId" placeholder="Enter UID or GUID">
+                    <select id="logType"><option value="users">User (1-on-1)</option><option value="groups">Group</option></select>
                     <button class="action-btn" onclick="fetchChatLogs()">Fetch History</button>
                 </div>
-            </div>
-            <div class="card" id="chatLogResults" style="min-height: 200px; max-height: 500px; overflow-y: auto;">
-                <div style="color: #bdc3c7; text-align: center; margin-top: 50px;">
-                    Select a target above to view message history.
+                <div style="font-size:12px; color:#999; margin-top:5px;">
+                    *Auto-Moderation active. Banned words: <i>spam, fake, scam, hate</i>
                 </div>
             </div>
+            <div class="card" id="chatLogResults" style="max-height: 500px; overflow-y: auto;"></div>
         </div>
 
-        <div id="calllogs" class="section">
+        <div id="broadcast" class="section">
             <div class="card">
-                <h3>📹 Call Inspector</h3>
-                <p style="color:#7f8c8d; font-size:14px; margin-bottom:15px;">View call history for a specific User or Group.</p>
+                <h3>📡 Global Broadcast</h3>
+                <p>Send a system message to a specific channel or simulate a broadcast.</p>
                 <div class="form-group">
-                    <input type="text" id="callId" placeholder="Enter UID or GUID to inspect">
-                    <select id="callType" style="flex:0.3">
-                        <option value="users">User</option>
-                        <option value="groups">Group</option>
-                    </select>
-                    <button class="action-btn" onclick="fetchCallLogs()">Fetch Call History</button>
+                    <input type="text" id="broadcastTarget" placeholder="Target GUID (e.g. 'general')">
+                    <input type="text" id="broadcastMsg" placeholder="Message content">
                 </div>
-            </div>
-            
-            <div class="card">
-                 <table id="callTable">
-                    <thead>
-                        <tr>
-                            <th>Status</th>
-                            <th>From</th>
-                            <th>To</th>
-                            <th>Type</th>
-                            <th>Time</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td colspan="5" style="text-align:center; padding:20px; color:#95a5a6;">Enter an ID above to view call history.</td></tr>
-                    </tbody>
-                </table>
+                <button class="action-btn" onclick="sendBroadcast()">🚀 Send Broadcast</button>
             </div>
         </div>
 
+        <div id="settings" class="section">
+            <div class="card">
+                <h3>🎨 Custom Branding</h3>
+                <div class="form-group">
+                    <label>Dashboard Title:</label>
+                    <input type="text" id="settingTitle" placeholder="My Company Admin">
+                </div>
+                <div class="form-group">
+                    <label>Theme Color:</label>
+                    <input type="color" id="settingColor" value="#34495e">
+                </div>
+                <button class="action-btn" onclick="saveSettings()">Save Branding</button>
+                <button class="secondary-btn" onclick="clearSettings()">Reset Default</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="modal-overlay">
+        <div id="modal-box">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h3 id="modal-title">Details</h3>
+            <div id="modal-content">Loading...</div>
+        </div>
     </div>
 
     <script>
         // ================= CONFIGURATION =================
         const APP_ID = "16690658bf8acd328";
         const REGION = "eu";
-        
-        // ⚠️ SECURITY WARNING: Keep this key private!
         const REST_API_KEY = "8031bed1942057c0bb44a1a0710ddb3875079025"; // <--- PASTE API KEY HERE
         
-        // 🔒 DASHBOARD PASSWORD
-        const DASHBOARD_PASSWORD = "admin"; // <--- CHANGE THIS PASSWORD
+        const ADMIN_PASS = "c0nsp1racy";
+        const MOD_PASS = "8031bed";
+        
+        const BANNED_WORDS = ["spam", "scam", "fake", "hate", "stupid"];
         // =================================================
 
-        const HEADERS = {
-            "apiKey": REST_API_KEY,
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        };
+        const HEADERS = { "apiKey": REST_API_KEY, "Content-Type": "application/json", "Accept": "application/json" };
         const BASE_URL = `https://${APP_ID}.api-${REGION}.cometchat.io/v3`;
+        
+        let currentRole = null; // 'admin' or 'mod'
 
-        // STATE VARIABLES FOR EDITING
-        let isEditingUser = false;
-        let isEditingGroup = false;
+        // --- 1. INITIALIZATION & SESSION ---
+        window.onload = function() {
+            loadSettings();
+            checkSession();
+        }
 
-        // --- AUTHENTICATION & LOCKING ---
-        function attemptLogin() {
-            const input = document.getElementById("passwordInput").value;
-            if(input === DASHBOARD_PASSWORD) {
-                document.getElementById("login-screen").style.display = "none";
-                document.getElementById("sidebar").style.display = "flex";
-                document.getElementById("main-content").style.display = "block";
-                fetchUsers(); // Auto load data
-            } else {
-                document.getElementById("loginError").style.display = "block";
+        function checkSession() {
+            const sessionRole = localStorage.getItem("dashboardRole");
+            const sessionTime = localStorage.getItem("dashboardSession");
+            const now = new Date().getTime();
+
+            // Session valid for 24 hours
+            if(sessionRole && sessionTime && (now - sessionTime < 86400000)) {
+                loginSuccess(sessionRole);
             }
         }
 
+        function attemptLogin() {
+            const input = document.getElementById("passwordInput").value;
+            if(input === ADMIN_PASS) loginSuccess('admin');
+            else if(input === MOD_PASS) loginSuccess('mod');
+            else document.getElementById("loginError").style.display = "block";
+        }
+
+        function loginSuccess(role) {
+            currentRole = role;
+            // Save Session
+            localStorage.setItem("dashboardRole", role);
+            localStorage.setItem("dashboardSession", new Date().getTime());
+
+            // UI Updates
+            document.getElementById("login-screen").style.display = "none";
+            document.getElementById("sidebar").style.display = "flex";
+            document.getElementById("main-content").style.display = "block";
+            document.getElementById("role-display").innerText = "Role: " + role.toUpperCase();
+
+            // Load Data
+            fetchUsers();
+            fetchGroups();
+            updateAnalytics();
+        }
+
         function lockDashboard() {
-            // Hide content
-            document.getElementById("sidebar").style.display = "none";
-            document.getElementById("main-content").style.display = "none";
-            // Show login
-            document.getElementById("login-screen").style.display = "flex";
-            // Clear password field
-            document.getElementById("passwordInput").value = "";
-            document.getElementById("loginError").style.display = "none";
+            localStorage.removeItem("dashboardRole");
+            localStorage.removeItem("dashboardSession");
+            location.reload();
         }
 
         function showSection(id) {
             document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            event.target.classList.add('active');
+            event.currentTarget.classList.add('active');
         }
 
-        // ================= USER FUNCTIONS =================
-        
+        // --- 2. ANALYTICS (CHART.JS) ---
+        async function updateAnalytics() {
+            // Fetch counts (Simulated for speed, in real app check pagination headers)
+            const uRes = await fetch(`${BASE_URL}/users?per_page=100`, { headers: HEADERS });
+            const gRes = await fetch(`${BASE_URL}/groups?per_page=100`, { headers: HEADERS });
+            const uData = await uRes.json();
+            const gData = await gRes.json();
+            
+            const uCount = uData.data.length;
+            const gCount = gData.data.length;
+
+            document.getElementById("totalUsersCount").innerText = uCount;
+            document.getElementById("totalGroupsCount").innerText = gCount;
+
+            // Render Chart
+            const ctx = document.getElementById('userChart').getContext('2d');
+            if(window.myChart) window.myChart.destroy();
+            window.myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Users', 'Groups'],
+                    datasets: [{
+                        data: [uCount, gCount],
+                        backgroundColor: ['#3498db', '#2ecc71']
+                    }]
+                }
+            });
+        }
+
+        // --- 3. USER MANAGEMENT ---
         async function fetchUsers() {
-            try {
-                const res = await fetch(`${BASE_URL}/users`, { headers: HEADERS });
-                const data = await res.json();
-                const tbody = document.querySelector("#userTable tbody");
-                tbody.innerHTML = "";
-                data.data.forEach(u => {
-                    tbody.innerHTML += `
-                        <tr>
-                            <td><img src="${u.avatar || 'https://via.placeholder.com/30'}" width="30" style="border-radius:50%"></td>
-                            <td>${u.uid}</td>
-                            <td>${u.name}</td>
-                            <td>${u.status || 'offline'}</td>
-                            <td>
-                                <button class="btn-sm edit-btn" onclick="startEditUser('${u.uid}', '${u.name}', '${u.avatar || ''}')">Edit</button>
-                                <button class="btn-sm delete-btn" onclick="deleteUser('${u.uid}')">Delete</button>
-                            </td>
-                        </tr>`;
-                });
-            } catch (e) { console.error(e); }
-        }
-
-        // Prepare form for Editing
-        function startEditUser(uid, name, avatar) {
-            isEditingUser = true;
-            document.getElementById("userFormTitle").innerText = "Edit User: " + uid;
-            document.getElementById("userUid").value = uid;
-            document.getElementById("userUid").disabled = true; // Cannot change UID
-            document.getElementById("userName").value = name;
-            document.getElementById("userAvatar").value = avatar;
-            
-            document.getElementById("saveUserBtn").innerText = "💾 Save Changes";
-            document.getElementById("saveUserBtn").style.background = "#f39c12";
-            document.getElementById("cancelUserBtn").style.display = "inline-block";
-        }
-
-        function resetUserForm() {
-            isEditingUser = false;
-            document.getElementById("userFormTitle").innerText = "Create New User";
-            document.getElementById("userUid").value = "";
-            document.getElementById("userUid").disabled = false;
-            document.getElementById("userName").value = "";
-            document.getElementById("userAvatar").value = "";
-            
-            document.getElementById("saveUserBtn").innerText = "+ Add User";
-            document.getElementById("saveUserBtn").style.background = "#3498db";
-            document.getElementById("cancelUserBtn").style.display = "none";
+            const res = await fetch(`${BASE_URL}/users?per_page=100`, { headers: HEADERS });
+            const data = await res.json();
+            const tbody = document.querySelector("#userTable tbody");
+            tbody.innerHTML = "";
+            data.data.forEach(u => {
+                const meta = u.metadata ? JSON.stringify(u.metadata) : "N/A";
+                tbody.innerHTML += `
+                    <tr>
+                        <td><input type="checkbox" class="chk-user" value="${u.uid}"></td>
+                        <td><img src="${u.avatar || 'https://via.placeholder.com/30'}" width="30" style="border-radius:50%"></td>
+                        <td>${u.uid}</td>
+                        <td>${u.name}</td>
+                        <td style="font-size:11px; color:#777;">${meta}</td>
+                        <td>
+                            <button class="secondary-btn" onclick="deactivateUser('${u.uid}')">🚫 Block</button>
+                            ${currentRole === 'admin' ? `<button class="delete-btn" onclick="deleteUser('${u.uid}')">🗑️</button>` : ''}
+                        </td>
+                    </tr>`;
+            });
         }
 
         async function saveUser() {
+            if(currentRole !== 'admin') return alert("Access Denied: Admins only.");
             const uid = document.getElementById("userUid").value;
             const name = document.getElementById("userName").value;
             const avatar = document.getElementById("userAvatar").value;
-
-            if(!uid || !name) return alert("UID and Name are required");
-
-            const payload = { name, avatar };
-            let url = `${BASE_URL}/users`;
-            let method = "POST";
-
-            if(isEditingUser) {
-                // Update mode
-                url = `${BASE_URL}/users/${uid}`;
-                method = "PUT";
-            } else {
-                // Create mode
-                payload.uid = uid;
-            }
-
-            try {
-                const res = await fetch(url, {
-                    method: method,
-                    headers: HEADERS,
-                    body: JSON.stringify(payload)
-                });
-                
-                if(res.ok) {
-                    fetchUsers();
-                    resetUserForm();
-                } else {
-                    const err = await res.json();
-                    alert("Error: " + JSON.stringify(err));
-                }
-            } catch(e) { alert("Network Error"); }
+            await fetch(`${BASE_URL}/users`, { method: "POST", headers: HEADERS, body: JSON.stringify({uid, name, avatar}) });
+            fetchUsers();
+            updateAnalytics();
         }
 
-        async function deleteUser(uid) {
-            if(!confirm("Are you sure you want to delete user: " + uid + "?")) return;
-            await fetch(`${BASE_URL}/users/${uid}`, { method: "DELETE", headers: HEADERS });
+        // "Deactivate" = Update Status to offline/custom (Soft Ban)
+        async function deactivateUser(uid) {
+            await fetch(`${BASE_URL}/users/${uid}`, { 
+                method: "PUT", headers: HEADERS, 
+                body: JSON.stringify({ name: `[BLOCKED] ${uid}`, metadata: { status: "blocked" } }) 
+            });
+            alert(`User ${uid} flagged as blocked.`);
             fetchUsers();
         }
 
+        async function deleteUser(uid) {
+            if(!confirm("Permanently delete?")) return;
+            await fetch(`${BASE_URL}/users/${uid}`, { method: "DELETE", headers: HEADERS });
+            fetchUsers();
+            updateAnalytics();
+        }
 
-        // ================= GROUP FUNCTIONS =================
+        async function bulkDeleteUsers() {
+            if(currentRole !== 'admin') return alert("Admins only.");
+            const checked = document.querySelectorAll('.chk-user:checked');
+            if(checked.length === 0) return alert("No users selected");
+            if(!confirm(`Delete ${checked.length} users?`)) return;
+            
+            for(const box of checked) {
+                await fetch(`${BASE_URL}/users/${box.value}`, { method: "DELETE", headers: HEADERS });
+            }
+            fetchUsers();
+        }
 
+        // --- 4. GROUP MANAGEMENT ---
         async function fetchGroups() {
-            const res = await fetch(`${BASE_URL}/groups`, { headers: HEADERS });
+            const res = await fetch(`${BASE_URL}/groups?per_page=100`, { headers: HEADERS });
             const data = await res.json();
             const tbody = document.querySelector("#groupTable tbody");
             tbody.innerHTML = "";
             data.data.forEach(g => {
                 tbody.innerHTML += `
                     <tr>
+                        <td><input type="checkbox" class="chk-group" value="${g.guid}"></td>
                         <td>${g.guid}</td>
                         <td>${g.name}</td>
                         <td>${g.type}</td>
-                        <td>${g.membersCount}</td>
-                        <td>
-                            <button class="btn-sm edit-btn" onclick="startEditGroup('${g.guid}', '${g.name}', '${g.type}')">Edit</button>
-                            <button class="btn-sm delete-btn" onclick="deleteGroup('${g.guid}')">Delete</button>
-                        </td>
+                        <td><button class="secondary-btn" onclick="inspectGroup('${g.guid}')">View Members (${g.membersCount})</button></td>
+                        <td>${currentRole === 'admin' ? `<button class="delete-btn" onclick="deleteGroup('${g.guid}')">🗑️</button>` : ''}</td>
                     </tr>`;
             });
         }
 
-        function startEditGroup(guid, name, type) {
-            isEditingGroup = true;
-            document.getElementById("groupFormTitle").innerText = "Edit Group: " + guid;
-            document.getElementById("groupGuid").value = guid;
-            document.getElementById("groupGuid").disabled = true;
-            document.getElementById("groupName").value = name;
-            document.getElementById("groupType").value = type;
+        async function inspectGroup(guid) {
+            document.getElementById("modal-overlay").style.display = "flex";
+            document.getElementById("modal-title").innerText = "Members of " + guid;
+            document.getElementById("modal-content").innerText = "Loading...";
             
-            document.getElementById("saveGroupBtn").innerText = "💾 Save Changes";
-            document.getElementById("saveGroupBtn").style.background = "#f39c12";
-            document.getElementById("cancelGroupBtn").style.display = "inline-block";
-        }
-
-        function resetGroupForm() {
-            isEditingGroup = false;
-            document.getElementById("groupFormTitle").innerText = "Create New Group";
-            document.getElementById("groupGuid").value = "";
-            document.getElementById("groupGuid").disabled = false;
-            document.getElementById("groupName").value = "";
-            document.getElementById("groupType").value = "public";
+            const res = await fetch(`${BASE_URL}/groups/${guid}/members`, { headers: HEADERS });
+            const data = await res.json();
             
-            document.getElementById("saveGroupBtn").innerText = "+ Create Group";
-            document.getElementById("saveGroupBtn").style.background = "#3498db";
-            document.getElementById("cancelGroupBtn").style.display = "none";
+            let html = "<ul style='padding-left:20px'>";
+            data.data.forEach(m => {
+                html += `<li><b>${m.name}</b> (${m.uid}) - ${m.scope}</li>`;
+            });
+            html += "</ul>";
+            document.getElementById("modal-content").innerHTML = html;
         }
 
         async function saveGroup() {
+            if(currentRole !== 'admin') return alert("Admins only.");
             const guid = document.getElementById("groupGuid").value;
             const name = document.getElementById("groupName").value;
             const type = document.getElementById("groupType").value;
-
-            if(!guid || !name) return alert("GUID and Name are required");
-
-            const payload = { name, type };
-            let url = `${BASE_URL}/groups`;
-            let method = "POST";
-
-            if(isEditingGroup) {
-                url = `${BASE_URL}/groups/${guid}`;
-                method = "PUT";
-            } else {
-                payload.guid = guid;
-            }
-
-            try {
-                const res = await fetch(url, {
-                    method: method,
-                    headers: HEADERS,
-                    body: JSON.stringify(payload)
-                });
-                
-                if(res.ok) {
-                    fetchGroups();
-                    resetGroupForm();
-                } else {
-                    alert("Error saving group");
-                }
-            } catch(e) { alert("Network Error"); }
+            await fetch(`${BASE_URL}/groups`, { method: "POST", headers: HEADERS, body: JSON.stringify({guid, name, type}) });
+            fetchGroups();
         }
-
+        
         async function deleteGroup(guid) {
-            if(!confirm("Delete group " + guid + "?")) return;
+            if(!confirm("Delete group?")) return;
             await fetch(`${BASE_URL}/groups/${guid}`, { method: "DELETE", headers: HEADERS });
             fetchGroups();
         }
 
-
-        // ================= LOG FUNCTIONS =================
+        // --- 5. LOGS & MODERATION ---
         async function fetchChatLogs() {
             const id = document.getElementById("logId").value;
             const type = document.getElementById("logType").value;
+            if(!id) return alert("Enter ID");
+            
             const container = document.getElementById("chatLogResults");
+            container.innerHTML = "Loading...";
             
-            if(!id) return alert("Please enter a UID or GUID");
-            container.innerHTML = "<p style='text-align:center'>Loading history...</p>";
+            const res = await fetch(`${BASE_URL}/${type}/${id}/messages`, { headers: HEADERS });
+            const data = await res.json();
+            container.innerHTML = "";
 
-            try {
-                const res = await fetch(`${BASE_URL}/${type}/${id}/messages`, { headers: HEADERS });
-                const data = await res.json();
-                container.innerHTML = "";
-
-                if(!data.data || data.data.length === 0) {
-                    container.innerHTML = "<p style='text-align:center'>No messages found.</p>";
-                    return;
-                }
-
-                data.data.forEach(msg => {
-                    let text = msg.data.text || "[Media/Action]";
-                    if(msg.category === "action") text = `<em>${msg.action}</em>`;
-                    
-                    let sender = msg.sender ? msg.sender.name : "System";
-                    let time = new Date(msg.sentAt * 1000).toLocaleString();
-
-                    container.innerHTML += `
-                        <div class="log-entry">
-                            <div class="log-meta">${sender} • ${time}</div>
-                            <div class="message-bubble">${text}</div>
-                        </div>`;
-                });
-            } catch(e) { container.innerHTML = "Error fetching logs: " + e.message; }
-        }
-
-        // ================= CALL LOG FUNCTIONS (NEW) =================
-        async function fetchCallLogs() {
-            const id = document.getElementById("callId").value;
-            const type = document.getElementById("callType").value;
-            const tbody = document.querySelector("#callTable tbody");
-
-            if(!id) return alert("Please enter a UID or GUID");
-            
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Loading call data...</td></tr>`;
-
-            try {
-                // Fetch messages specifically filtered for category=call
-                const res = await fetch(`${BASE_URL}/${type}/${id}/messages?category=call&limit=30`, { 
-                    headers: HEADERS 
-                });
-                
-                const data = await res.json();
-                tbody.innerHTML = "";
-
-                if(!data.data || data.data.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px;">No call history found for this ID.</td></tr>`;
-                    return;
-                }
-
-                data.data.forEach(msg => {
-                    const action = msg.action; // initiated, ongoing, ended, cancelled, rejected
-                    const callType = msg.type; // audio or video
-                    
-                    let senderName = msg.sender ? msg.sender.name : "Unknown";
-                    let receiverName = msg.receiver ? msg.receiver.name : "Unknown";
-                    let time = new Date(msg.sentAt * 1000).toLocaleString();
-
-                    // Map action to CSS class for badges
-                    let badgeClass = "status-busy";
-                    if(action === "initiated") badgeClass = "status-initiated";
-                    if(action === "ended") badgeClass = "status-ended";
-                    if(action === "cancelled") badgeClass = "status-cancelled";
-                    if(action === "rejected") badgeClass = "status-rejected";
-
-                    tbody.innerHTML += `
-                        <tr>
-                            <td><span class="call-badge ${badgeClass}">${action}</span></td>
-                            <td>${senderName}</td>
-                            <td>${receiverName}</td>
-                            <td style="text-transform:capitalize;">${callType}</td>
-                            <td>${time}</td>
-                        </tr>`;
-                });
-
-            } catch(e) { 
-                console.error(e);
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Error fetching logs. check console.</td></tr>`;
+            if(!data.data || data.data.length === 0) {
+                container.innerHTML = "No messages.";
+                return;
             }
+
+            data.data.forEach(msg => {
+                const text = msg.data.text || "";
+                let contentHtml = text;
+                let isToxic = false;
+
+                // Auto-Moderation Check
+                BANNED_WORDS.forEach(word => {
+                    if(text.toLowerCase().includes(word)) {
+                        contentHtml = contentHtml.replace(new RegExp(word, "gi"), `<span class="banned-word">${word}</span>`);
+                        isToxic = true;
+                    }
+                });
+
+                const bgClass = isToxic ? "style='background:#ffeaea;'" : "";
+
+                container.innerHTML += `
+                    <div class="log-entry" ${bgClass}>
+                        <div class="log-content">
+                            <div class="log-meta">${msg.sender ? msg.sender.name : 'System'} • ${new Date(msg.sentAt*1000).toLocaleString()}</div>
+                            <div class="message-bubble">${contentHtml}</div>
+                        </div>
+                        ${currentRole === 'admin' ? `<button class="delete-btn" onclick="deleteMessage('${msg.id}')">Delete</button>` : ''}
+                    </div>`;
+            });
         }
+
+        async function deleteMessage(msgId) {
+            if(!confirm("Delete this message?")) return;
+            // Note: Message deletion API requires 'messages' endpoint
+            await fetch(`${BASE_URL}/messages/${msgId}`, { method: "DELETE", headers: HEADERS });
+            alert("Message deleted.");
+            fetchChatLogs(); // Refresh
+        }
+
+        // --- 6. UTILS (Search, CSV, Settings) ---
+        function filterTable(inputId, tableId) {
+            const term = document.getElementById(inputId).value.toLowerCase();
+            const rows = document.querySelectorAll(`#${tableId} tbody tr`);
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(term) ? "" : "none";
+            });
+        }
+
+        function exportTableToCSV(tableId, filename) {
+            let csv = [];
+            let rows = document.querySelectorAll(`#${tableId} tr`);
+            for (let i = 0; i < rows.length; i++) {
+                let row = [], cols = rows[i].querySelectorAll("td, th");
+                for (let j = 1; j < cols.length - 1; j++) // Skip Checkbox & Actions cols
+                    row.push(cols[j].innerText.replace(/,/g, "")); 
+                csv.push(row.join(","));
+            }
+            let csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
+            let link = document.createElement("a");
+            link.download = filename;
+            link.href = window.URL.createObjectURL(csvFile);
+            link.style.display = "none";
+            document.body.appendChild(link);
+            link.click();
+        }
+
+        function toggleAll(source, tableId) {
+            const checkboxes = document.querySelectorAll(`#${tableId} input[type='checkbox']`);
+            checkboxes.forEach(c => c.checked = source.checked);
+        }
+
+        function closeModal() { document.getElementById("modal-overlay").style.display = "none"; }
+
+        // --- 7. BROADCAST ---
+        async function sendBroadcast() {
+            if(currentRole !== 'admin') return alert("Admins only.");
+            const target = document.getElementById("broadcastTarget").value;
+            const msg = document.getElementById("broadcastMsg").value;
+            if(!target || !msg) return alert("Fill all fields");
+
+            await fetch(`${BASE_URL}/messages`, {
+                method: "POST", headers: HEADERS,
+                body: JSON.stringify({
+                    receiver: target,
+                    receiverType: "group",
+                    category: "message",
+                    type: "text",
+                    data: { text: "[SYSTEM BROADCAST]: " + msg }
+                })
+            });
+            alert("Broadcast sent!");
+        }
+
+        // --- 8. CUSTOM SETTINGS ---
+        function saveSettings() {
+            const title = document.getElementById("settingTitle").value;
+            const color = document.getElementById("settingColor").value;
+            localStorage.setItem("dashTitle", title);
+            localStorage.setItem("dashColor", color);
+            applySettings(title, color);
+            alert("Settings Saved");
+        }
+        function loadSettings() {
+            const title = localStorage.getItem("dashTitle");
+            const color = localStorage.getItem("dashColor");
+            if(title && color) applySettings(title, color);
+        }
+        function applySettings(title, color) {
+            document.getElementById("login-title").innerText = title;
+            document.getElementById("sidebar-title").innerText = title;
+            document.getElementById("sidebar").style.backgroundColor = color;
+            document.getElementById("login-screen").style.backgroundColor = color;
+            document.documentElement.style.setProperty('--primary-color', color);
+        }
+        function clearSettings() {
+            localStorage.removeItem("dashTitle");
+            localStorage.removeItem("dashColor");
+            location.reload();
+        }
+
     </script>
 </body>
 </html>
