@@ -3,11 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CometChat Demo</title>
+    <title>CometChat Stable Demo</title>
+    <style>
+        /* Force the container to be visible */
+        #cometchat-container {
+            width: 100vw;
+            height: 100vh;
+            background-color: #fafafa;
+        }
+    </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #ffffff;">
+<body style="margin: 0; padding: 0; overflow: hidden;">
 
-    <div id="cometchat-container" style="width: 100%; height: 100vh;"></div>
+    <div id="cometchat-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@cometchat/chat-embed@latest/dist/main.js"></script>
 
@@ -16,38 +24,38 @@
             const checkSDK = setInterval(() => {
                 if (window.CometChatWidget) {
                     clearInterval(checkSDK);
-                    setupChat();
+                    renderChat();
                 }
             }, 200);
         });
 
-        async function setupChat() {
+        async function renderChat() {
             const appID = "16690658bf8acd328"; 
             const region = "eu"; 
             const authKey = "0a2c73baa5e4a8bb0858f4e97963328839e97436";
+            
+            // Let's use a unique ID to ensure we aren't hitting a "Deleted" user
             const uid = "rossmackenzie"; 
 
             try {
-                // 1. Initialize
                 await CometChatWidget.init({ appID, appRegion: region, authKey });
-                console.log("Init Success");
+                
+                // This helper method logs in OR creates the user if they are missing
+                await CometChatWidget.createOrUserLogin({
+                    uid: uid,
+                    name: "Test User"
+                });
 
-                // 2. Short pause to let internal 'mf.js' params settle
-                await new Promise(res => setTimeout(res, 500));
-
-                // 3. Login
-                await CometChatWidget.login({ uid });
-                console.log("Login Success");
-
-                // 4. Launch
                 CometChatWidget.launch({
                     targetElementID: "cometchat-container",
                     docked: false,
                     height: "100%",
                     width: "100%",
                 });
+                console.log("Chat launched successfully!");
             } catch (error) {
-                console.error("Chat Setup Error:", error);
+                console.error("Critical Launch Error:", error);
+                document.body.innerHTML = `<div style="padding:20px;">Chat failed to load: ${error.message}</div>`;
             }
         }
     </script>
