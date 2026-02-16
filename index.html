@@ -20,25 +20,21 @@
             const authKey = "0a2c73baa5e4a8bb0858f4e97963328839e97436";
             const uid = "rossmackenzie"; 
             
-            // This is the ID you found in your dashboard
+            // Your ID from the dashboard
             const widgetID = "68cd1384b8e2941a954dc962"; 
 
             let checkLoaded = setInterval(function() {
                 if(window.CometChatWidget) {
                     clearInterval(checkLoaded);
                     
-                    console.log("SDK Ready. Initializing App...");
-
                     CometChatWidget.init({
                         "appID": appID,
                         "appRegion": region,
                         "authKey": authKey
                     }).then(response => {
-                        console.log("Init Success. Logging in...");
-
                         CometChatWidget.login({ "uid": uid }).then(user => {
-                            console.log("Login Success. Launching Widget...");
-
+                            
+                            // Using the ID you provided as the widgetID
                             CometChatWidget.launch({
                                 "widgetID": widgetID,
                                 "target": "#cometchat",
@@ -47,7 +43,7 @@
                                 "width": "100%",
                                 "roundedCorners": "true"
                             }).then(response => {
-                                console.log("Chat is live!");
+                                console.log("Success! Chat should be visible.");
                             }).catch(err => {
                                 console.error("Launch error:", err);
                             });
