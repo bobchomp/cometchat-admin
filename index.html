@@ -1,26 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>CometChat Admin Page</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CometChat Embed | Ross</title>
     
     <script defer src="https://widget-js.cometchat.io/v3/cometchatwidget.js"></script>
-</head>
-<body style="margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; background: #f0f0f0;">
 
-    <div id="cometchat" style="width: 100%; height: 100vh;"></div>
+    <style>
+        /* This ensures the chat takes up the entire browser window perfectly */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #ffffff;
+        }
+        #cometchat {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="cometchat"></div>
 
     <script>
         window.addEventListener('DOMContentLoaded', (event) => {
             
-            // 1. Configuration
-            // Your exact App ID and Region
+            // Your Credentials
             const appID = "16690658bf8acd328";
             const region = "eu";
-            const authKey = "0a2c73baa5e4a8bb0858f4e97963328839e97436";
-            
-            // 2. Settings
+            const authKey = "a63927e130c6bb02ece83c14d3909128a7a632f8";
+            const uid = "rossmackenzie"; 
+
             const appSettings = {
                 "appID": appID,
                 "appRegion": region,
@@ -31,34 +46,41 @@
                 "target": "#cometchat", 
                 "width": "100%",
                 "height": "100%",
-                "defaultID": "rossmackenzie", // Ensure this user exists!
-                "defaultType": "user",
                 "docked": "false", 
                 "alignment": "left",
-                "roundedCorners": "true",
-                "height": "100%", 
-                "width": "100%"
+                "roundedCorners": "true"
             };
 
-            // 3. Launch
-            // We use a simple interval to wait for the script to be ready
+            // Check for SDK every 100ms
             let checkLoaded = setInterval(function() {
                 if(window.CometChatWidget) {
-                    console.log("CometChatWidget found!");
                     clearInterval(checkLoaded);
+                    console.log("CometChat SDK detected. Initializing...");
 
+                    // 1. Initialize the App
                     CometChatWidget.init(appSettings).then(response => {
-                        console.log("Initialization completed successfully");
-                        
-                        // Launch the widget
-                        CometChatWidget.launch(widgetSettings).then(response => {
-                            console.log("CometChatWidget launched successfully");
-                        }, error => {
-                            console.log("CometChatWidget launch failed with error:", error);
+                        console.log("Init successful.");
+
+                        // 2. Create or Login the user 'rossmackenzie'
+                        CometChatWidget.createOrUserLogin({
+                            uid: uid,
+                            name: "Ross MacKenzie"
+                        }).then(user => {
+                            console.log("Auth successful for UID:", uid);
+                            
+                            // 3. Launch the UI
+                            CometChatWidget.launch(widgetSettings).then(response => {
+                                console.log("Widget launched.");
+                            }).catch(err => {
+                                console.error("Widget launch failed:", err);
+                            });
+
+                        }).catch(error => {
+                            console.error("User Login/Creation failed:", error);
                         });
 
-                    }, error => {
-                        console.log("Initialization failed with error:", error);
+                    }).catch(error => {
+                        console.error("Initialization failed:", error);
                     });
                 }
             }, 100);
