@@ -8,7 +8,6 @@
     <script defer src="https://widget-js.cometchat.io/v3/cometchatwidget.js"></script>
 
     <style>
-        /* This ensures the chat takes up the entire browser window perfectly */
         html, body {
             margin: 0;
             padding: 0;
@@ -30,7 +29,6 @@
     <script>
         window.addEventListener('DOMContentLoaded', (event) => {
             
-            // Your Credentials
             const appID = "16690658bf8acd328";
             const region = "eu";
             const authKey = "a63927e130c6bb02ece83c14d3909128a7a632f8";
@@ -51,32 +49,30 @@
                 "roundedCorners": "true"
             };
 
-            // Check for SDK every 100ms
             let checkLoaded = setInterval(function() {
                 if(window.CometChatWidget) {
                     clearInterval(checkLoaded);
                     console.log("CometChat SDK detected. Initializing...");
 
-                    // 1. Initialize the App
+                    // 1. Initialize
                     CometChatWidget.init(appSettings).then(response => {
                         console.log("Init successful.");
 
-                        // 2. Create or Login the user 'rossmackenzie'
-                        CometChatWidget.createOrUserLogin({
-                            uid: uid,
-                            name: "Ross MacKenzie"
+                        // 2. Login (V3 syntax)
+                        CometChatWidget.login({
+                            uid: uid
                         }).then(user => {
-                            console.log("Auth successful for UID:", uid);
+                            console.log("Login successful for:", uid);
                             
-                            // 3. Launch the UI
+                            // 3. Launch
                             CometChatWidget.launch(widgetSettings).then(response => {
-                                console.log("Widget launched.");
+                                console.log("Widget launched successfully.");
                             }).catch(err => {
-                                console.error("Widget launch failed:", err);
+                                console.error("Launch error:", err);
                             });
 
                         }).catch(error => {
-                            console.error("User Login/Creation failed:", error);
+                            console.error("Login failed. Check if UID exists in Dashboard:", error);
                         });
 
                     }).catch(error => {
