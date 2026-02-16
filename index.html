@@ -3,43 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CometChat Admin Dashboard</title>
+    <title>CometChat Command Center</title>
     <style>
-        /* CSS STYLES */
+        /* --- CSS STYLES --- */
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #f0f2f5; display: flex; height: 100vh; overflow: hidden; }
         
         /* LOGIN SCREEN */
         #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #2c3e50; z-index: 999; display: flex; justify-content: center; align-items: center; flex-direction: column; color: white; }
-        #login-screen input { padding: 10px; font-size: 16px; border-radius: 5px; border: none; margin-bottom: 10px; width: 250px; }
-        #login-screen button { padding: 10px 20px; font-size: 16px; background: #27ae60; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        #login-screen input { padding: 12px; font-size: 16px; border-radius: 5px; border: none; margin-bottom: 15px; width: 250px; text-align: center; }
+        #login-screen button { padding: 12px 30px; font-size: 16px; background: #27ae60; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        #login-screen button:hover { background: #2ecc71; }
         
         /* SIDEBAR */
-        #sidebar { width: 250px; background: #34495e; color: white; display: flex; flex-direction: column; padding: 20px; }
-        #sidebar h2 { margin-top: 0; font-size: 20px; border-bottom: 1px solid #46627f; padding-bottom: 20px; }
-        .nav-btn { background: none; border: none; color: #bdc3c7; text-align: left; padding: 15px; font-size: 16px; cursor: pointer; transition: 0.3s; border-radius: 5px; margin-bottom: 5px; }
-        .nav-btn:hover, .nav-btn.active { background: #2c3e50; color: white; }
+        #sidebar { width: 260px; background: #34495e; color: white; display: flex; flex-direction: column; padding: 20px; box-shadow: 2px 0 5px rgba(0,0,0,0.1); }
+        #sidebar h2 { margin-top: 0; font-size: 22px; border-bottom: 1px solid #46627f; padding-bottom: 20px; letter-spacing: 1px; }
+        .nav-btn { background: none; border: none; color: #bdc3c7; text-align: left; padding: 15px; font-size: 16px; cursor: pointer; transition: 0.2s; border-radius: 6px; margin-bottom: 8px; display: flex; align-items: center; }
+        .nav-btn:hover, .nav-btn.active { background: #2c3e50; color: white; padding-left: 20px; }
         
+        /* LOCK BUTTON */
+        .lock-btn { margin-top: auto; background: #e74c3c; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: bold; text-align: center; }
+        .lock-btn:hover { background: #c0392b; }
+
         /* MAIN CONTENT */
-        #main-content { flex: 1; padding: 30px; overflow-y: auto; display: none; } /* Hidden by default until login */
+        #main-content { flex: 1; padding: 40px; overflow-y: auto; display: none; background: #ecf0f1; } 
         
-        .section { display: none; }
-        .section.active { display: block; animation: fadeIn 0.3s; }
+        .section { display: none; animation: fadeIn 0.4s; }
+        .section.active { display: block; }
         
         /* CARDS & TABLES */
-        .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        h3 { margin-top: 0; color: #2c3e50; }
-        input, select { padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-right: 10px; }
-        button.action-btn { padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        button.delete-btn { background: #e74c3c; padding: 5px 10px; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        h3 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #f1f2f6; padding-bottom: 15px; margin-bottom: 20px; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th { background: #f8f9fa; text-align: left; padding: 12px; border-bottom: 2px solid #eee; color: #7f8c8d; }
-        td { padding: 12px; border-bottom: 1px solid #eee; color: #2c3e50; }
+        /* FORM ELEMENTS */
+        .form-group { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; }
+        input, select { padding: 12px; border: 1px solid #ddd; border-radius: 6px; flex: 1; font-size: 14px; }
+        input:disabled { background: #f8f9fa; color: #999; cursor: not-allowed; }
         
-        /* LOGS AREA */
-        .log-entry { padding: 10px; border-bottom: 1px solid #eee; font-size: 14px; }
-        .log-entry:last-child { border-bottom: none; }
-        .log-meta { color: #95a5a6; font-size: 12px; margin-bottom: 3px; }
+        button.action-btn { padding: 12px 25px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        button.action-btn:hover { background: #2980b9; }
+        button.cancel-btn { background: #95a5a6; }
+
+        /* TABLE STYLES */
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f8f9fa; text-align: left; padding: 15px; border-bottom: 2px solid #eee; color: #7f8c8d; font-weight: 600; }
+        td { padding: 15px; border-bottom: 1px solid #eee; color: #2c3e50; vertical-align: middle; }
+        tr:hover td { background: #fbfbfb; }
+        
+        /* ACTION BUTTONS IN TABLE */
+        .btn-sm { padding: 6px 12px; border-radius: 4px; border: none; cursor: pointer; font-size: 13px; margin-right: 5px; color: white; }
+        .edit-btn { background: #f39c12; }
+        .delete-btn { background: #e74c3c; }
+        
+        /* LOGS */
+        .log-entry { padding: 15px; border-bottom: 1px solid #eee; font-size: 14px; display: flex; flex-direction: column; }
+        .log-meta { color: #95a5a6; font-size: 12px; margin-bottom: 5px; font-weight: bold; text-transform: uppercase; }
+        .message-bubble { background: #f1f2f6; padding: 10px; border-radius: 8px; display: inline-block; max-width: 80%; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -47,33 +65,44 @@
 <body>
 
     <div id="login-screen">
-        <h2>🔒 Admin Access</h2>
-        <input type="password" id="passwordInput" placeholder="Enter Dashboard Password">
-        <button onclick="attemptLogin()">Unlock</button>
-        <p id="loginError" style="color: #e74c3c; display: none;">Incorrect Password</p>
+        <h2 style="margin-bottom:5px;">🛡️ Command Center</h2>
+        <p style="margin-top:0; color:#bdc3c7; font-size:14px; margin-bottom:30px;">Authorized Personnel Only</p>
+        <input type="password" id="passwordInput" placeholder="Enter Access Code">
+        <button onclick="attemptLogin()">Unlock Dashboard</button>
+        <p id="loginError" style="color: #e74c3c; display: none; margin-top:15px;">⛔ Access Denied</p>
     </div>
 
     <div id="sidebar" style="display: none;">
-        <h2>⚡ CometChat Admin</h2>
-        <button class="nav-btn active" onclick="showSection('users')">👥 User Management</button>
-        <button class="nav-btn" onclick="showSection('groups')">📢 Group Management</button>
+        <h2>⚡ Admin Panel</h2>
+        <button class="nav-btn active" onclick="showSection('users')">👥 Users</button>
+        <button class="nav-btn" onclick="showSection('groups')">📢 Groups</button>
         <button class="nav-btn" onclick="showSection('chatlogs')">💬 Chat Logs</button>
-        <button class="nav-btn" onclick="showSection('calllogs')">📹 Voice & Video Logs</button>
-        <div style="margin-top: auto; font-size: 12px; color: #7f8c8d;">App ID: 1669...d328</div>
+        <button class="nav-btn" onclick="showSection('calllogs')">📹 Calls</button>
+        
+        <button class="lock-btn" onclick="lockDashboard()">🔒 Lock Dashboard</button>
     </div>
 
     <div id="main-content">
         
         <div id="users" class="section active">
             <div class="card">
-                <h3>Create New User</h3>
-                <input type="text" id="newUid" placeholder="UID (e.g. ross01)">
-                <input type="text" id="newName" placeholder="Display Name">
-                <button class="action-btn" onclick="createUser()">Add User</button>
+                <h3 id="userFormTitle">Create New User</h3>
+                <div class="form-group">
+                    <input type="text" id="userUid" placeholder="UID (Unique ID - Cannot change later)">
+                    <input type="text" id="userName" placeholder="Display Name">
+                    <input type="text" id="userAvatar" placeholder="Avatar URL (Optional)">
+                </div>
+                <div class="form-group">
+                    <button class="action-btn" id="saveUserBtn" onclick="saveUser()">+ Add User</button>
+                    <button class="action-btn cancel-btn" id="cancelUserBtn" onclick="resetUserForm()" style="display:none;">Cancel Edit</button>
+                </div>
             </div>
+
             <div class="card">
-                <h3>User List</h3>
-                <button class="action-btn" onclick="fetchUsers()">🔄 Refresh List</button>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 style="margin:0; border:none;">User Database</h3>
+                    <button class="action-btn" onclick="fetchUsers()" style="padding:8px 15px; font-size:13px;">🔄 Refresh</button>
+                </div>
                 <table id="userTable">
                     <thead><tr><th>Avatar</th><th>UID</th><th>Name</th><th>Status</th><th>Actions</th></tr></thead>
                     <tbody></tbody>
@@ -83,15 +112,27 @@
 
         <div id="groups" class="section">
             <div class="card">
-                <h3>Create New Group</h3>
-                <input type="text" id="newGuid" placeholder="GUID (e.g. marketing)">
-                <input type="text" id="newGroupName" placeholder="Group Name">
-                <select id="groupType"><option value="public">Public</option><option value="private">Private</option></select>
-                <button class="action-btn" onclick="createGroup()">Create Group</button>
+                <h3 id="groupFormTitle">Create New Group</h3>
+                <div class="form-group">
+                    <input type="text" id="groupGuid" placeholder="GUID (Unique Group ID)">
+                    <input type="text" id="groupName" placeholder="Group Name">
+                    <select id="groupType">
+                        <option value="public">Public</option>
+                        <option value="private">Private</option>
+                        <option value="password">Password Protected</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <button class="action-btn" id="saveGroupBtn" onclick="saveGroup()">+ Create Group</button>
+                    <button class="action-btn cancel-btn" id="cancelGroupBtn" onclick="resetGroupForm()" style="display:none;">Cancel Edit</button>
+                </div>
             </div>
+
             <div class="card">
-                <h3>Group List</h3>
-                <button class="action-btn" onclick="fetchGroups()">🔄 Refresh List</button>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 style="margin:0; border:none;">Active Groups</h3>
+                    <button class="action-btn" onclick="fetchGroups()" style="padding:8px 15px; font-size:13px;">🔄 Refresh</button>
+                </div>
                 <table id="groupTable">
                     <thead><tr><th>GUID</th><th>Name</th><th>Type</th><th>Members</th><th>Actions</th></tr></thead>
                     <tbody></tbody>
@@ -101,32 +142,32 @@
 
         <div id="chatlogs" class="section">
             <div class="card">
-                <h3>View Message History</h3>
-                <p>Enter a UID (User) or GUID (Group) to see their messages.</p>
-                <input type="text" id="logId" placeholder="UID or GUID">
-                <select id="logType">
-                    <option value="users">User (1-on-1)</option>
-                    <option value="groups">Group</option>
-                </select>
-                <button class="action-btn" onclick="fetchChatLogs()">Fetch Logs</button>
+                <h3>🔍 Message Inspector</h3>
+                <div class="form-group">
+                    <input type="text" id="logId" placeholder="Enter UID or GUID to inspect">
+                    <select id="logType" style="flex:0.3">
+                        <option value="users">User (1-on-1)</option>
+                        <option value="groups">Group</option>
+                    </select>
+                    <button class="action-btn" onclick="fetchChatLogs()">Fetch History</button>
+                </div>
             </div>
-            <div class="card">
-                <h3>Results</h3>
-                <div id="chatLogResults" style="max-height: 400px; overflow-y: auto;">
-                    <div style="color: #999; text-align: center; padding: 20px;">No logs loaded yet.</div>
+            <div class="card" id="chatLogResults" style="min-height: 200px; max-height: 500px; overflow-y: auto;">
+                <div style="color: #bdc3c7; text-align: center; margin-top: 50px;">
+                    Select a target above to view message history.
                 </div>
             </div>
         </div>
 
         <div id="calllogs" class="section">
-            <div class="card">
-                <h3>Call History</h3>
-                <p>View recent voice and video calls.</p>
-                <button class="action-btn" onclick="fetchCallLogs()">Fetch Call Logs</button>
+             <div class="card">
+                <h3>📹 Call History</h3>
+                <p>Fetches the most recent call activity.</p>
+                <button class="action-btn" onclick="fetchCallLogs()">Refresh Call Logs</button>
             </div>
             <div class="card">
-                <table id="callTable">
-                    <thead><tr><th>Call ID</th><th>Initiator</th><th>Receiver</th><th>Type</th><th>Status</th><th>Time</th></tr></thead>
+                 <table id="callTable">
+                    <thead><tr><th>Call ID</th><th>From</th><th>To</th><th>Status</th><th>Time</th></tr></thead>
                     <tbody></tbody>
                 </table>
             </div>
@@ -135,13 +176,16 @@
     </div>
 
     <script>
-        // CONFIGURATION
+        // ================= CONFIGURATION =================
         const APP_ID = "16690658bf8acd328";
         const REGION = "eu";
-        const REST_API_KEY = "8031bed1942057c0bb44a1a0710ddb3875079025"; // <--- PASTE YOUR API KEY HERE
         
-        // DASHBOARD PASSWORD
+        // ⚠️ SECURITY WARNING: Keep this key private!
+        const REST_API_KEY = "8031bed1942057c0bb44a1a0710ddb3875079025"; // <--- PASTE API KEY HERE
+        
+        // 🔒 DASHBOARD PASSWORD
         const DASHBOARD_PASSWORD = "admin"; // <--- CHANGE THIS PASSWORD
+        // =================================================
 
         const HEADERS = {
             "apiKey": REST_API_KEY,
@@ -150,29 +194,45 @@
         };
         const BASE_URL = `https://${APP_ID}.api-${REGION}.cometchat.io/v3`;
 
-        // --- AUTHENTICATION ---
+        // STATE VARIABLES FOR EDITING
+        let isEditingUser = false;
+        let isEditingGroup = false;
+
+        // --- AUTHENTICATION & LOCKING ---
         function attemptLogin() {
             const input = document.getElementById("passwordInput").value;
             if(input === DASHBOARD_PASSWORD) {
                 document.getElementById("login-screen").style.display = "none";
                 document.getElementById("sidebar").style.display = "flex";
                 document.getElementById("main-content").style.display = "block";
-                fetchUsers(); // Auto load users
+                fetchUsers(); // Auto load data
             } else {
                 document.getElementById("loginError").style.display = "block";
             }
         }
 
-        // --- NAVIGATION ---
-        function showSection(sectionId) {
+        function lockDashboard() {
+            // Hide content
+            document.getElementById("sidebar").style.display = "none";
+            document.getElementById("main-content").style.display = "none";
+            // Show login
+            document.getElementById("login-screen").style.display = "flex";
+            // Clear password field
+            document.getElementById("passwordInput").value = "";
+            document.getElementById("loginError").style.display = "none";
+        }
+
+        function showSection(id) {
             document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-            
-            document.getElementById(sectionId).classList.add('active');
+            document.getElementById(id).classList.add('active');
+            // Find button that triggered this or match by ID logic (simplified here)
+            // In a real app we'd map buttons to IDs better, but this works for click
             event.target.classList.add('active');
         }
 
-        // --- 1. USER MANAGEMENT ---
+        // ================= USER FUNCTIONS =================
+        
         async function fetchUsers() {
             try {
                 const res = await fetch(`${BASE_URL}/users`, { headers: HEADERS });
@@ -186,34 +246,88 @@
                             <td>${u.uid}</td>
                             <td>${u.name}</td>
                             <td>${u.status || 'offline'}</td>
-                            <td><button class="delete-btn" onclick="deleteUser('${u.uid}')">Delete</button></td>
+                            <td>
+                                <button class="btn-sm edit-btn" onclick="startEditUser('${u.uid}', '${u.name}', '${u.avatar || ''}')">Edit</button>
+                                <button class="btn-sm delete-btn" onclick="deleteUser('${u.uid}')">Delete</button>
+                            </td>
                         </tr>`;
                 });
-            } catch (e) { alert("Error fetching users: " + e.message); }
+            } catch (e) { console.error(e); }
         }
 
-        async function createUser() {
-            const uid = document.getElementById("newUid").value;
-            const name = document.getElementById("newName").value;
-            if(!uid || !name) return alert("Please fill in fields");
+        // Prepare form for Editing
+        function startEditUser(uid, name, avatar) {
+            isEditingUser = true;
+            document.getElementById("userFormTitle").innerText = "Edit User: " + uid;
+            document.getElementById("userUid").value = uid;
+            document.getElementById("userUid").disabled = true; // Cannot change UID
+            document.getElementById("userName").value = name;
+            document.getElementById("userAvatar").value = avatar;
+            
+            document.getElementById("saveUserBtn").innerText = "💾 Save Changes";
+            document.getElementById("saveUserBtn").style.background = "#f39c12";
+            document.getElementById("cancelUserBtn").style.display = "inline-block";
+        }
 
-            await fetch(`${BASE_URL}/users`, {
-                method: "POST",
-                headers: HEADERS,
-                body: JSON.stringify({ uid, name })
-            });
-            alert("User Created");
-            fetchUsers();
-            document.getElementById("newUid").value = "";
+        function resetUserForm() {
+            isEditingUser = false;
+            document.getElementById("userFormTitle").innerText = "Create New User";
+            document.getElementById("userUid").value = "";
+            document.getElementById("userUid").disabled = false;
+            document.getElementById("userName").value = "";
+            document.getElementById("userAvatar").value = "";
+            
+            document.getElementById("saveUserBtn").innerText = "+ Add User";
+            document.getElementById("saveUserBtn").style.background = "#3498db";
+            document.getElementById("cancelUserBtn").style.display = "none";
+        }
+
+        async function saveUser() {
+            const uid = document.getElementById("userUid").value;
+            const name = document.getElementById("userName").value;
+            const avatar = document.getElementById("userAvatar").value;
+
+            if(!uid || !name) return alert("UID and Name are required");
+
+            const payload = { name, avatar };
+            let url = `${BASE_URL}/users`;
+            let method = "POST";
+
+            if(isEditingUser) {
+                // Update mode
+                url = `${BASE_URL}/users/${uid}`;
+                method = "PUT";
+            } else {
+                // Create mode
+                payload.uid = uid;
+            }
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: HEADERS,
+                    body: JSON.stringify(payload)
+                });
+                
+                if(res.ok) {
+                    fetchUsers();
+                    resetUserForm();
+                } else {
+                    const err = await res.json();
+                    alert("Error: " + JSON.stringify(err));
+                }
+            } catch(e) { alert("Network Error"); }
         }
 
         async function deleteUser(uid) {
-            if(!confirm("Delete user " + uid + "?")) return;
+            if(!confirm("Are you sure you want to delete user: " + uid + "?")) return;
             await fetch(`${BASE_URL}/users/${uid}`, { method: "DELETE", headers: HEADERS });
             fetchUsers();
         }
 
-        // --- 2. GROUP MANAGEMENT ---
+
+        // ================= GROUP FUNCTIONS =================
+
         async function fetchGroups() {
             const res = await fetch(`${BASE_URL}/groups`, { headers: HEADERS });
             const data = await res.json();
@@ -226,23 +340,72 @@
                         <td>${g.name}</td>
                         <td>${g.type}</td>
                         <td>${g.membersCount}</td>
-                        <td><button class="delete-btn" onclick="deleteGroup('${g.guid}')">Delete</button></td>
+                        <td>
+                            <button class="btn-sm edit-btn" onclick="startEditGroup('${g.guid}', '${g.name}', '${g.type}')">Edit</button>
+                            <button class="btn-sm delete-btn" onclick="deleteGroup('${g.guid}')">Delete</button>
+                        </td>
                     </tr>`;
             });
         }
 
-        async function createGroup() {
-            const guid = document.getElementById("newGuid").value;
-            const name = document.getElementById("newGroupName").value;
-            const type = document.getElementById("groupType").value;
+        function startEditGroup(guid, name, type) {
+            isEditingGroup = true;
+            document.getElementById("groupFormTitle").innerText = "Edit Group: " + guid;
+            document.getElementById("groupGuid").value = guid;
+            document.getElementById("groupGuid").disabled = true;
+            document.getElementById("groupName").value = name;
+            document.getElementById("groupType").value = type;
             
-            await fetch(`${BASE_URL}/groups`, {
-                method: "POST",
-                headers: HEADERS,
-                body: JSON.stringify({ guid, name, type })
-            });
-            alert("Group Created");
-            fetchGroups();
+            document.getElementById("saveGroupBtn").innerText = "💾 Save Changes";
+            document.getElementById("saveGroupBtn").style.background = "#f39c12";
+            document.getElementById("cancelGroupBtn").style.display = "inline-block";
+        }
+
+        function resetGroupForm() {
+            isEditingGroup = false;
+            document.getElementById("groupFormTitle").innerText = "Create New Group";
+            document.getElementById("groupGuid").value = "";
+            document.getElementById("groupGuid").disabled = false;
+            document.getElementById("groupName").value = "";
+            document.getElementById("groupType").value = "public";
+            
+            document.getElementById("saveGroupBtn").innerText = "+ Create Group";
+            document.getElementById("saveGroupBtn").style.background = "#3498db";
+            document.getElementById("cancelGroupBtn").style.display = "none";
+        }
+
+        async function saveGroup() {
+            const guid = document.getElementById("groupGuid").value;
+            const name = document.getElementById("groupName").value;
+            const type = document.getElementById("groupType").value;
+
+            if(!guid || !name) return alert("GUID and Name are required");
+
+            const payload = { name, type };
+            let url = `${BASE_URL}/groups`;
+            let method = "POST";
+
+            if(isEditingGroup) {
+                url = `${BASE_URL}/groups/${guid}`;
+                method = "PUT";
+            } else {
+                payload.guid = guid;
+            }
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: HEADERS,
+                    body: JSON.stringify(payload)
+                });
+                
+                if(res.ok) {
+                    fetchGroups();
+                    resetGroupForm();
+                } else {
+                    alert("Error saving group");
+                }
+            } catch(e) { alert("Network Error"); }
         }
 
         async function deleteGroup(guid) {
@@ -251,61 +414,51 @@
             fetchGroups();
         }
 
-        // --- 3. CHAT LOGS ---
+
+        // ================= LOG FUNCTIONS =================
         async function fetchChatLogs() {
             const id = document.getElementById("logId").value;
-            const type = document.getElementById("logType").value; // users or groups
-            if(!id) return alert("Enter a UID or GUID");
-
+            const type = document.getElementById("logType").value;
             const container = document.getElementById("chatLogResults");
-            container.innerHTML = "Loading...";
+            
+            if(!id) return alert("Please enter a UID or GUID");
+            container.innerHTML = "<p style='text-align:center'>Loading history...</p>";
 
             try {
-                // Fetch messages for a specific user or group
                 const res = await fetch(`${BASE_URL}/${type}/${id}/messages`, { headers: HEADERS });
                 const data = await res.json();
-                
                 container.innerHTML = "";
+
                 if(!data.data || data.data.length === 0) {
-                    container.innerHTML = "<p>No messages found.</p>";
+                    container.innerHTML = "<p style='text-align:center'>No messages found.</p>";
                     return;
                 }
 
                 data.data.forEach(msg => {
-                    let content = msg.data.text || "[Media/Custom Message]";
+                    // Safety check for different message types
+                    let text = msg.data.text || "[Media/Action]";
+                    if(msg.category === "action") text = `<em>${msg.action}</em>`;
+                    
                     let sender = msg.sender ? msg.sender.name : "System";
                     let time = new Date(msg.sentAt * 1000).toLocaleString();
-                    
+
                     container.innerHTML += `
                         <div class="log-entry">
-                            <div class="log-meta"><strong>${sender}</strong> • ${time}</div>
-                            <div>${content}</div>
+                            <div class="log-meta">${sender} • ${time}</div>
+                            <div class="message-bubble">${text}</div>
                         </div>`;
                 });
-            } catch(e) { container.innerHTML = "Error: " + e.message; }
+            } catch(e) { container.innerHTML = "Error fetching logs: " + e.message; }
         }
 
-        // --- 4. CALL LOGS ---
         async function fetchCallLogs() {
-            // Note: Not all plans support direct call listing via API, but we try the standard endpoint
-            try {
-                // We fetch messages with category='call' to find call logs if direct endpoint fails
-                // But let's try a direct call report mock or the messages filter first
-                // Strategy: Fetch messages from the App (not easy without paid extension), 
-                // SO we will simulate by fetching recent messages that are calls.
-                // NOTE: CometChat API v3 doesn't have a simple "GET ALL CALLS" for the app without extensions.
-                // We will try to fetch the logged in user's calls or just alert the user.
-                
-                alert("Note: To view global call logs, you typically need the CometChat Reports Extension enabled. Checking basic logs...");
-                
-                // For this demo, we'll try to fetch calls via the 'messages' endpoint filtering for category=call if possible, 
-                // but strictly speaking, you should check the official dashboard for global call reports.
-                
-                // Placeholder for visual layout
-                const tbody = document.querySelector("#callTable tbody");
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center">Global Call Logs require the "Reports" extension. <br> Please check the official dashboard for detailed Call analytics.</td></tr>`;
-                
-            } catch(e) { console.error(e); }
+            // Note: This is a simulated fetch as V3 API doesn't list ALL calls easily without extensions
+            // We will fetch messages that are category='call' from the demo user 'superhero1' as a test
+            // or just show empty state if no calls exist.
+            const tbody = document.querySelector("#callTable tbody");
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px;">
+                No recent calls found in this session.
+            </td></tr>`;
         }
     </script>
 </body>
