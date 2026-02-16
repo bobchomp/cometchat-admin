@@ -59,6 +59,14 @@
         .log-meta { color: #95a5a6; font-size: 12px; margin-bottom: 5px; font-weight: bold; text-transform: uppercase; }
         .message-bubble { background: #f1f2f6; padding: 10px; border-radius: 8px; display: inline-block; max-width: 80%; }
 
+        /* CALL STATUS BADGES */
+        .call-badge { color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; text-transform: uppercase; font-weight: bold; display: inline-block; width: 80px; text-align: center;}
+        .status-initiated { background: #f39c12; }
+        .status-ended { background: #27ae60; }
+        .status-cancelled { background: #e74c3c; }
+        .status-rejected { background: #c0392b; }
+        .status-busy { background: #95a5a6; }
+
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -160,15 +168,33 @@
         </div>
 
         <div id="calllogs" class="section">
-             <div class="card">
-                <h3>📹 Call History</h3>
-                <p>Fetches the most recent call activity.</p>
-                <button class="action-btn" onclick="fetchCallLogs()">Refresh Call Logs</button>
+            <div class="card">
+                <h3>📹 Call Inspector</h3>
+                <p style="color:#7f8c8d; font-size:14px; margin-bottom:15px;">View call history for a specific User or Group.</p>
+                <div class="form-group">
+                    <input type="text" id="callId" placeholder="Enter UID or GUID to inspect">
+                    <select id="callType" style="flex:0.3">
+                        <option value="users">User</option>
+                        <option value="groups">Group</option>
+                    </select>
+                    <button class="action-btn" onclick="fetchCallLogs()">Fetch Call History</button>
+                </div>
             </div>
+            
             <div class="card">
                  <table id="callTable">
-                    <thead><tr><th>Call ID</th><th>From</th><th>To</th><th>Status</th><th>Time</th></tr></thead>
-                    <tbody></tbody>
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Type</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="5" style="text-align:center; padding:20px; color:#95a5a6;">Enter an ID above to view call history.</td></tr>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -226,8 +252,6 @@
             document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            // Find button that triggered this or match by ID logic (simplified here)
-            // In a real app we'd map buttons to IDs better, but this works for click
             event.target.classList.add('active');
         }
 
@@ -435,7 +459,6 @@
                 }
 
                 data.data.forEach(msg => {
-                    // Safety check for different message types
                     let text = msg.data.text || "[Media/Action]";
                     if(msg.category === "action") text = `<em>${msg.action}</em>`;
                     
@@ -451,14 +474,59 @@
             } catch(e) { container.innerHTML = "Error fetching logs: " + e.message; }
         }
 
+        // ================= CALL LOG FUNCTIONS (NEW) =================
         async function fetchCallLogs() {
-            // Note: This is a simulated fetch as V3 API doesn't list ALL calls easily without extensions
-            // We will fetch messages that are category='call' from the demo user 'superhero1' as a test
-            // or just show empty state if no calls exist.
+            const id = document.getElementById("callId").value;
+            const type = document.getElementById("callType").value;
             const tbody = document.querySelector("#callTable tbody");
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px;">
-                No recent calls found in this session.
-            </td></tr>`;
+
+            if(!id) return alert("Please enter a UID or GUID");
+            
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Loading call data...</td></tr>`;
+
+            try {
+                // Fetch messages specifically filtered for category=call
+                const res = await fetch(`${BASE_URL}/${type}/${id}/messages?category=call&limit=30`, { 
+                    headers: HEADERS 
+                });
+                
+                const data = await res.json();
+                tbody.innerHTML = "";
+
+                if(!data.data || data.data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px;">No call history found for this ID.</td></tr>`;
+                    return;
+                }
+
+                data.data.forEach(msg => {
+                    const action = msg.action; // initiated, ongoing, ended, cancelled, rejected
+                    const callType = msg.type; // audio or video
+                    
+                    let senderName = msg.sender ? msg.sender.name : "Unknown";
+                    let receiverName = msg.receiver ? msg.receiver.name : "Unknown";
+                    let time = new Date(msg.sentAt * 1000).toLocaleString();
+
+                    // Map action to CSS class for badges
+                    let badgeClass = "status-busy";
+                    if(action === "initiated") badgeClass = "status-initiated";
+                    if(action === "ended") badgeClass = "status-ended";
+                    if(action === "cancelled") badgeClass = "status-cancelled";
+                    if(action === "rejected") badgeClass = "status-rejected";
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><span class="call-badge ${badgeClass}">${action}</span></td>
+                            <td>${senderName}</td>
+                            <td>${receiverName}</td>
+                            <td style="text-transform:capitalize;">${callType}</td>
+                            <td>${time}</td>
+                        </tr>`;
+                });
+
+            } catch(e) { 
+                console.error(e);
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Error fetching logs. check console.</td></tr>`;
+            }
         }
     </script>
 </body>
