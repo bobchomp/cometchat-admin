@@ -1,63 +1,68 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
+    <title>CometChat Embed</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CometChat Stable Demo</title>
-    <style>
-        /* Force the container to be visible */
-        #cometchat-container {
-            width: 100vw;
-            height: 100vh;
-            background-color: #fafafa;
-        }
-    </style>
+    
+    <script defer src="https://widget-js.cometchat.io/v3/cometchatwidget.js"></script>
 </head>
-<body style="margin: 0; padding: 0; overflow: hidden;">
+<body style="margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; background: #f0f0f0;">
 
-    <div id="cometchat-container"></div>
-
-    <script src="https://cdn.jsdelivr.net/npm/@cometchat/chat-embed@latest/dist/main.js"></script>
+    <div id="cometchat" style="width: 100%; height: 100vh;"></div>
 
     <script>
-        window.addEventListener('load', function() {
-            const checkSDK = setInterval(() => {
-                if (window.CometChatWidget) {
-                    clearInterval(checkSDK);
-                    renderChat();
-                }
-            }, 200);
-        });
-
-        async function renderChat() {
-            const appID = "16690658bf8acd328"; 
-            const region = "eu"; 
-            const authKey = "0a2c73baa5e4a8bb0858f4e97963328839e97436";
+        window.addEventListener('DOMContentLoaded', (event) => {
             
-            // Let's use a unique ID to ensure we aren't hitting a "Deleted" user
-            const uid = "rossmackenzie"; 
+            // 1. Configuration
+            // Your exact App ID and Region
+            const appID = "16690658bf8acd328";
+            const region = "eu";
+            const authKey = "a63927e130c6bb02ece83c14d3909128a7a632f8";
+            
+            // 2. Settings
+            const appSettings = {
+                "appID": appID,
+                "appRegion": region,
+                "authKey": authKey
+            };
 
-            try {
-                await CometChatWidget.init({ appID, appRegion: region, authKey });
-                
-                // This helper method logs in OR creates the user if they are missing
-                await CometChatWidget.createOrUserLogin({
-                    uid: uid,
-                    name: "Test User"
-                });
+            const widgetSettings = {
+                "target": "#cometchat", 
+                "width": "100%",
+                "height": "100%",
+                "defaultID": "superhero1", // Ensure this user exists!
+                "defaultType": "user",
+                "docked": "false", 
+                "alignment": "left",
+                "roundedCorners": "true",
+                "height": "100%", 
+                "width": "100%"
+            };
 
-                CometChatWidget.launch({
-                    targetElementID: "cometchat-container",
-                    docked: false,
-                    height: "100%",
-                    width: "100%",
-                });
-                console.log("Chat launched successfully!");
-            } catch (error) {
-                console.error("Critical Launch Error:", error);
-                document.body.innerHTML = `<div style="padding:20px;">Chat failed to load: ${error.message}</div>`;
-            }
-        }
+            // 3. Launch
+            // We use a simple interval to wait for the script to be ready
+            let checkLoaded = setInterval(function() {
+                if(window.CometChatWidget) {
+                    console.log("CometChatWidget found!");
+                    clearInterval(checkLoaded);
+
+                    CometChatWidget.init(appSettings).then(response => {
+                        console.log("Initialization completed successfully");
+                        
+                        // Launch the widget
+                        CometChatWidget.launch(widgetSettings).then(response => {
+                            console.log("CometChatWidget launched successfully");
+                        }, error => {
+                            console.log("CometChatWidget launch failed with error:", error);
+                        });
+
+                    }, error => {
+                        console.log("Initialization failed with error:", error);
+                    });
+                }
+            }, 100);
+        });
     </script>
 </body>
 </html>
